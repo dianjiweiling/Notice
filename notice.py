@@ -5,6 +5,7 @@
 import urllib2
 import re
 import time
+#import string
 
 def get_page():
     try:
@@ -19,30 +20,38 @@ def get_page():
 def get_new_notice(r):
     pattern = r'h2>([\s\S]*?)</h2>[\s\S]*?<p>([\s\S]*?)</p'
     Notice=re.findall(pattern,r)
-    lst = list()
-    notice_list = list()
-    have_new_notice = False
-    for i,j in Notice:
-        lst.append(i+j)
-    fin = open(r'notice.txt','r')
-    for notice in fin.readline():
-        if notice not in lst:
-            have_new_notice = True
-            notice_list.append(notice)
-    fin.close()
-    return lst,notice_list,have_new_notice
-
-def sve_to_file(have_new_notice):
-    if have_new_notice:
-        fhand = open(r'notice.txt','w')
-        for tice in lst:
-            fhand.write(i+j+'\n')
-        fhand.close()
+    try:    
+        fhand = open(r'/storage/sdcard0/notice.txt','r')  
+    except:
+        return Notice 
+    old_notice=eval(fhand.read())
+    new_notice=list()
+    dic=dict()
+    for key,value in Notice[0:-1]:
+        if key in old_notice: continue
+        new_notice.append((key,value))
+    if len(new_notice) > 0:
+        for (i,j) in new_notice:
+            print i+j
+        return Notice
+    else :
+        return False
 
 
-    
+def save_to_file(Notice):
+    dic = dict()
+    with open(r'/storage/sdcard0/notice.txt','w') as fhand:
+        for notice,day in Notice[0:-1]: 
+            dic[notice]=day        
+        fhand.write(str(dic))
+    print '保存新文件'
 
 if __name__ == '__main__':
-    
-    r = get_page()
-    get_new_notice(r)
+    while True:
+        r = get_page()
+        Notice = get_new_notice(r)
+        if Notice:
+            save_to_file(Notice)
+        else:
+            print 'NO new notice!'
+        time.sleep(300)
